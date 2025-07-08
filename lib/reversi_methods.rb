@@ -55,6 +55,7 @@ module ReversiMethods
     end
 
     # 修正
+    # trueの時に石を置くよう変更
     if turn_succeed
       copied_board[pos.row][pos.col] = stone_color
       copy_board(board, copied_board) unless dry_run
@@ -68,6 +69,7 @@ module ReversiMethods
     return false if target_pos.stone_color(board) == attack_stone_color
 
     # 追加
+    # 同じ色の石・空白・向こうの時は挟めないようにする
     target_color = target_pos.stone_color(board)
     return false if target_color.nil? || target_color == attack_stone_color || target_color == BLANK_CELL
 
@@ -91,11 +93,11 @@ module ReversiMethods
         next unless cell == BLANK_CELL
 
         position = Position.new(row, col)
-        result = put_stone(board, position.to_cell_ref, attack_stone_color, dry_run: true)
-        # 追加
-        return true if result
+        return true if put_stone(board, position.to_cell_ref, attack_stone_color, dry_run: true)
       end
     end
+    # 追加
+    # finished?(board)を動かすため追加
     false
   end
 
