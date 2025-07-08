@@ -47,15 +47,18 @@ module ReversiMethods
 
     # コピーした盤面にて石の配置を試みて、成功すれば反映する
     copied_board = Marshal.load(Marshal.dump(board))
-    copied_board[pos.row][pos.col] = stone_color
-
     turn_succeed = false
+
     Position::DIRECTIONS.each do |direction|
       next_pos = pos.next_position(direction)
       turn_succeed = true if turn(copied_board, next_pos, stone_color, direction)
     end
 
-    copy_board(board, copied_board) if !dry_run && turn_succeed
+    # 修正
+    if turn_succeed
+      copied_board[pos.row][pos.col] = stone_color
+      copy_board(board, copied_board) unless dry_run
+    end
 
     turn_succeed
   end
@@ -63,6 +66,10 @@ module ReversiMethods
   def turn(board, target_pos, attack_stone_color, direction)
     return false if target_pos.out_of_board?
     return false if target_pos.stone_color(board) == attack_stone_color
+
+    # 追加
+    target_color = target_pos.stone_color(board)
+    return false if target_color.nil? || target_color == attack_stone_color || target_color == BLANK_CELL
 
     next_pos = target_pos.next_position(direction)
     if (next_pos.stone_color(board) == attack_stone_color) || turn(board, next_pos, attack_stone_color, direction)
@@ -77,15 +84,30 @@ module ReversiMethods
     !placeable?(board, WHITE_STONE) && !placeable?(board, BLACK_STONE)
   end
 
+  # def placeable?(board, attack_stone_color)
+  #   board.each_with_index do |cols, row|
+  #     cols.each_with_index do |cell, col|
+  #       next unless cell == BLANK_CELL
+
+  #       position = Position.new(row, col)
+  #       return true if put_stone(board, position.to_cell_ref, attack_stone_color, dry_run: true)
+  #     end
+  #   end
+  # end
+
+  # 修正
   def placeable?(board, attack_stone_color)
-    board.each_with_index do |cols, row|
-      cols.each_with_index do |cell, col|
+    board.each_with_index do |row, i|
+      row.each_with_index do |cell, j|
         next unless cell == BLANK_CELL
 
-        position = Position.new(row, col)
-        return true if put_stone(board, position.to_cell_ref, attack_stone_color, dry_run: true)
+        pos = Position.new(i, j)
+        ref = pos.to_cell_ref
+        result = put_stone(board, ref, attack_stone_color, dry_run: true)
+        return true if result
       end
     end
+    false
   end
 
   def count_stone(board, stone_color)
