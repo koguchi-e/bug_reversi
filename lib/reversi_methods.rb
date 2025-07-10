@@ -46,7 +46,6 @@ module ReversiMethods
     raise 'すでに石が置かれています' unless pos.stone_color(board) == BLANK_CELL
 
     copied_board = Marshal.load(Marshal.dump(board))
-    # row colの位置入れ替え
     copied_board[pos.row][pos.col] = stone_color
 
     turn_succeed = false
@@ -61,13 +60,11 @@ module ReversiMethods
     turn_succeed
   end
 
+  # 最初のコード
   def turn(board, target_pos, attack_stone_color, direction)
     return false if target_pos.out_of_board?
     return false if target_pos.stone_color(board) == attack_stone_color
-
-    # 同じ色の石・空白・向こうの時は挟めないようにする
-    target_color = target_pos.stone_color(board)
-    return false if target_color.nil? || target_color == attack_stone_color || target_color == BLANK_CELL
+    return false if target_pos.stone_color(board) == BLANK_CELL
 
     next_pos = target_pos.next_position(direction)
     if (next_pos.stone_color(board) == attack_stone_color) || turn(board, next_pos, attack_stone_color, direction)
