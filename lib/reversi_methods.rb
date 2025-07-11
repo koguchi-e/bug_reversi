@@ -49,7 +49,6 @@ module ReversiMethods
     copied_board[pos.row][pos.col] = stone_color
 
     turn_succeed = false
-
     Position::DIRECTIONS.each do |direction|
       next_pos = pos.next_position(direction)
       turn_succeed = true if turn(copied_board, next_pos, stone_color, direction)
@@ -60,7 +59,6 @@ module ReversiMethods
     turn_succeed
   end
 
-  # 最初のコード
   def turn(board, target_pos, attack_stone_color, direction)
     return false if target_pos.out_of_board?
     return false if target_pos.stone_color(board) == attack_stone_color
@@ -88,7 +86,6 @@ module ReversiMethods
         return true if put_stone(board, position.to_cell_ref, attack_stone_color, dry_run: true)
       end
     end
-    # finished?(board)を動かすため追加
     false
   end
 
